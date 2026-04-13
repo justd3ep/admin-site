@@ -10,7 +10,7 @@ import {
   mockResponse,
 } from './mockData';
 
-const BASE_URL = 'https://kanteen-queue-production.up.railway.app/api/v1';
+const BASE_URL = 'https://kanteen-queue-production.up.railway.app/api';
 
 const api = axios.create({
   baseURL: BASE_URL,
