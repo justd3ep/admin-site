@@ -75,14 +75,12 @@ export const getShops = async () => {
 
 export const getPendingShops = async () => {
   if (isDemo()) { await delay(); return mockResponse(mockPendingShops); }
-  // There is no explicit '/shops/pending' in swagger, so fetching all and filtering might be needed. 
-  // If the backend doesn't support it directly, you'll need a backend update or param ?status=pending.
-  return api.get('/shops', { params: { isVerified: false } }); 
+  return api.get('/v1/shops/pending'); // Admin-only: returns is_verified=false shops
 };
 
 export const approveShop = async (id) => {
   if (isDemo()) { await delay(300); return mockResponse({ success: true, id }); }
-  return api.patch(`/shops/${id}/status`, { status: 'approved' }); // Spec matches /shops/{id}/status
+  return api.patch(`/v1/shops/${id}/verify`); // Marks is_verified=true
 };
 
 export const rejectShop = async (id) => {

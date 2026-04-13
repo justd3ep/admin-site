@@ -3,12 +3,15 @@ import { getPendingShops, approveShop, rejectShop } from '../services/api';
 import { Spinner, ErrorMsg, EmptyState } from '../components/StatusWidgets';
 import Modal from '../components/Modal';
 
+const fmt = (val, fallback = '—') => (val !== undefined && val !== null && val !== '') ? val : fallback;
+const fmtDate = (d) => d ? new Date(d).toLocaleString() : '—';
+
 export default function PendingApprovalsPage() {
-  const [shops, setShops] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
+  const [shops, setShops]               = useState([]);
+  const [loading, setLoading]           = useState(true);
+  const [error, setError]               = useState('');
   const [selectedShop, setSelectedShop] = useState(null);
-  const [modalType, setModalType] = useState(''); // 'approve' | 'reject'
+  const [modalType, setModalType]       = useState(''); // 'approve' | 'reject'
   const [actionLoading, setActionLoading] = useState(false);
 
   const fetchPending = () => {
@@ -21,7 +24,7 @@ export default function PendingApprovalsPage() {
 
   useEffect(() => { fetchPending(); }, []);
 
-  const openModal = (shop, type) => { setSelectedShop(shop); setModalType(type); };
+  const openModal  = (shop, type) => { setSelectedShop(shop); setModalType(type); };
   const closeModal = () => { setSelectedShop(null); setModalType(''); };
 
   const handleConfirm = async () => {
@@ -29,7 +32,7 @@ export default function PendingApprovalsPage() {
     setActionLoading(true);
     try {
       if (modalType === 'approve') await approveShop(selectedShop.id);
-      if (modalType === 'reject') await rejectShop(selectedShop.id);
+      if (modalType === 'reject')  await rejectShop(selectedShop.id);
       fetchPending();
       closeModal();
     } catch {
@@ -40,7 +43,7 @@ export default function PendingApprovalsPage() {
   };
 
   if (loading) return <Spinner />;
-  if (error) return <ErrorMsg message={error} />;
+  if (error)   return <ErrorMsg message={error} />;
 
   return (
     <div>
@@ -52,48 +55,73 @@ export default function PendingApprovalsPage() {
       {shops.length === 0 ? (
         <EmptyState message="No pending shops. All caught up! ✅" />
       ) : (
-        <div className="table-wrapper">
-          <table className="data-table">
-            <thead>
-              <tr>
-                <th>Name</th>
-                <th>Owner</th>
-                <th>Location</th>
-                <th>Submitted</th>
-                <th>Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {shops.map((shop) => (
-                <tr key={shop.id}>
-                  <td>{shop.name}</td>
-                  <td>{shop.ownerName || shop.owner || '—'}</td>
-                  <td>{shop.location || `${shop.lat ?? '?'}, ${shop.lng ?? '?'}`}</td>
-                  <td>
-                    {shop.createdAt
-                      ? new Date(shop.createdAt).toLocaleDateString()
-                      : '—'}
-                  </td>
-                  <td>
-                    <div className="action-btns">
-                      <button
-                        className="btn btn-sm btn-success"
-                        onClick={() => openModal(shop, 'approve')}
-                      >
-                        Approve
-                      </button>
-                      <button
-                        className="btn btn-sm btn-danger"
-                        onClick={() => openModal(shop, 'reject')}
-                      >
-                        Reject
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+        <div className="approval-cards">
+          {shops.map((shop) => (
+            <div key={shop.id} className="approval-card">
+              {/* Header */}
+              <div className="approval-card-header">
+                <div>
+                  <h3 className="approval-card-title">{fmt(shop.name)}</h3>
+                  <span className="approval-card-sub">Submitted {fmtDate(shop.inserted_at)}</span>
+                </div>
+                <span className="badge badge-yellow">Pending</span>
+              </div>
+
+              {/* Details grid */}
+              <div className="approval-detail-grid">
+                <div className="approval-detail-item">
+                  <span className="approval-detail-label">📍 Address</span>
+                  <span className="approval-detail-value">{fmt(shop.address)}</span>
+                </div>
+                <div className="approval-detail-item">
+                  <span className="approval-detail-label">🌐 Coordinates</span>
+                  <span className="approval-detail-value">
+                    {shop.latitude != null ? `${shop.latitude}, ${shop.longitude}` : '—'}
+                  </span>
+                </div>
+                <div className="approval-detail-item">
+                  <span className="approval-detail-label">🪑 Seating Capacity</span>
+                  <span className="approval-detail-value">{fmt(shop.seating_capacity)}</span>
+                </div>
+                <div className="approval-detail-item">
+                  <span className="approval-detail-label">🪑 Table Count</span>
+                  <span className="approval-detail-value">{fmt(shop.table_count)}</span>
+                </div>
+                <div className="approval-detail-item">
+                  <span className="approval-detail-label">🕐 Opening Time</span>
+                  <span className="approval-detail-value">{fmt(shop.opening_time)}</span>
+                </div>
+                <div className="approval-detail-item">
+                  <span className="approval-detail-label">🕐 Closing Time</span>
+                  <span className="approval-detail-value">{fmt(shop.closing_time)}</span>
+                </div>
+                <div className="approval-detail-item">
+                  <span className="approval-detail-label">⭐ Rating</span>
+                  <span className="approval-detail-value">{fmt(shop.rating)}</span>
+                </div>
+                <div className="approval-detail-item">
+                  <span className="approval-detail-label">🔖 Owner ID</span>
+                  <span className="approval-detail-value approval-detail-mono">{fmt(shop.owner_id)}</span>
+                </div>
+              </div>
+
+              {/* Actions */}
+              <div className="approval-card-actions">
+                <button
+                  className="btn btn-success"
+                  onClick={() => openModal(shop, 'approve')}
+                >
+                  ✅ Approve
+                </button>
+                <button
+                  className="btn btn-danger"
+                  onClick={() => openModal(shop, 'reject')}
+                >
+                  ❌ Reject &amp; Delete
+                </button>
+              </div>
+            </div>
+          ))}
         </div>
       )}
 
@@ -104,8 +132,8 @@ export default function PendingApprovalsPage() {
         >
           <p>
             {modalType === 'approve'
-              ? `Approve "${selectedShop.name}" and make it live?`
-              : `Reject and permanently delete "${selectedShop.name}"?`}
+              ? `Approve "${selectedShop.name}" and make it live for users?`
+              : `Permanently delete "${selectedShop.name}"? This cannot be undone.`}
           </p>
           <div className="modal-actions">
             <button className="btn btn-ghost" onClick={closeModal}>Cancel</button>
@@ -114,7 +142,7 @@ export default function PendingApprovalsPage() {
               onClick={handleConfirm}
               disabled={actionLoading}
             >
-              {actionLoading ? 'Processing…' : modalType === 'approve' ? 'Approve' : 'Reject'}
+              {actionLoading ? 'Processing…' : modalType === 'approve' ? 'Approve' : 'Delete'}
             </button>
           </div>
         </Modal>
