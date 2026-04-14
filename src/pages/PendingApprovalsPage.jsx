@@ -62,7 +62,7 @@ export default function PendingApprovalsPage() {
               <div className="approval-card-header">
                 <div>
                   <h3 className="approval-card-title">{fmt(shop.name)}</h3>
-                  <span className="approval-card-sub">Submitted {fmtDate(shop.inserted_at)}</span>
+                  <span className="approval-card-sub">Submitted {fmtDate(shop.created_at)}</span>
                 </div>
                 <span className="badge badge-yellow">Pending</span>
               </div>
@@ -84,20 +84,12 @@ export default function PendingApprovalsPage() {
                   <span className="approval-detail-value">{fmt(shop.seating_capacity)}</span>
                 </div>
                 <div className="approval-detail-item">
-                  <span className="approval-detail-label">🪑 Table Count</span>
-                  <span className="approval-detail-value">{fmt(shop.table_count)}</span>
+                  <span className="approval-detail-label">💰 Avg Price</span>
+                  <span className="approval-detail-value">{shop.avg_price != null ? `₹${shop.avg_price}` : '—'}</span>
                 </div>
                 <div className="approval-detail-item">
-                  <span className="approval-detail-label">🕐 Opening Time</span>
-                  <span className="approval-detail-value">{fmt(shop.opening_time)}</span>
-                </div>
-                <div className="approval-detail-item">
-                  <span className="approval-detail-label">🕐 Closing Time</span>
-                  <span className="approval-detail-value">{fmt(shop.closing_time)}</span>
-                </div>
-                <div className="approval-detail-item">
-                  <span className="approval-detail-label">⭐ Rating</span>
-                  <span className="approval-detail-value">{fmt(shop.rating)}</span>
+                  <span className="approval-detail-label">👤 Owner</span>
+                  <span className="approval-detail-value">{fmt(shop.owner_name)}</span>
                 </div>
                 <div className="approval-detail-item">
                   <span className="approval-detail-label">🔖 Owner ID</span>
@@ -117,7 +109,7 @@ export default function PendingApprovalsPage() {
                   className="btn btn-danger"
                   onClick={() => openModal(shop, 'reject')}
                 >
-                  ❌ Reject &amp; Delete
+                  ❌ Reject
                 </button>
               </div>
             </div>
@@ -132,8 +124,8 @@ export default function PendingApprovalsPage() {
         >
           <p>
             {modalType === 'approve'
-              ? `Approve "${selectedShop.name}" and make it live for users?`
-              : `Permanently delete "${selectedShop.name}"? This cannot be undone.`}
+              ? `Approve "${selectedShop.name}" and make it live for customers?`
+              : `Reject "${selectedShop.name}"? The request will be marked as rejected.`}
           </p>
           <div className="modal-actions">
             <button className="btn btn-ghost" onClick={closeModal}>Cancel</button>
@@ -142,7 +134,7 @@ export default function PendingApprovalsPage() {
               onClick={handleConfirm}
               disabled={actionLoading}
             >
-              {actionLoading ? 'Processing…' : modalType === 'approve' ? 'Approve' : 'Delete'}
+              {actionLoading ? 'Processing…' : modalType === 'approve' ? 'Approve' : 'Reject'}
             </button>
           </div>
         </Modal>

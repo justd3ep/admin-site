@@ -75,17 +75,17 @@ export const getShops = async () => {
 
 export const getPendingShops = async () => {
   if (isDemo()) { await delay(); return mockResponse(mockPendingShops); }
-  return api.get('/shops/pending'); // Admin-only: returns is_verified=false shops
+  return api.get('/shop-requests?status=pending');
 };
 
 export const approveShop = async (id) => {
   if (isDemo()) { await delay(300); return mockResponse({ success: true, id }); }
-  return api.patch(`/shops/${id}/verify`); // Marks is_verified=true
+  return api.post(`/shop-requests/${id}/approve`);
 };
 
 export const rejectShop = async (id) => {
   if (isDemo()) { await delay(300); return mockResponse({ success: true, id }); }
-  return api.delete(`/shops/${id}`);
+  return api.post(`/shop-requests/${id}/reject`);
 };
 
 export const deactivateShop = async (id) => {
